@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -94,11 +96,14 @@ class MainActivity : ComponentActivity() {
                 if(songs.isEmpty()){
                     Text(responseText)
                 }else{
-                    songs.forEach{
-                        Text("ID: ${it.id}\nSong Title: ${it.title}\nArtist: ${it.artist}\n" +
-                                "Year: ${it.year}\nDownloads: ${it.downloads}\nPrice: ${it.price}\n"+
-                                "Quantity: ${it.quantity}\n" +
-                                "_____________________________________________________")
+                    LazyColumn {
+                        items(songs) {currentItem -> Text(
+                            "ID: ${currentItem.id}\nSong Title: ${currentItem.title}\n" +
+                                    "Artist: ${currentItem.artist}\nYear: ${currentItem.year}\n" +
+                                    "Downloads: ${currentItem.downloads}\nPrice: ${currentItem.price}" +
+                                    "\nQuantity: ${currentItem.quantity}\n" +
+                                    "_____________________________________________________"
+                        )}
                     }
                 }
             }

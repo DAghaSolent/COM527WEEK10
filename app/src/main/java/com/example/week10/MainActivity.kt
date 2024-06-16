@@ -63,13 +63,17 @@ class MainActivity : ComponentActivity() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Row{
-                Button(modifier = Modifier.fillMaxWidth(),onClick = {
-                    var response =  ""
-                    lifecycleScope.launch {
-                        withContext(Dispatchers.IO){
-                            response = URL("http://10.0.2.2:3000/artist/${searchArtist}").readText()
+                Button(modifier = Modifier.fillMaxWidth(), onClick = {
+                    var url = "http://10.0.2.2:3000/artist/${searchArtist}"
+                    url.httpGet().response { request, response, result ->
+                        when(result){
+                            is Result.Success -> {
+                                responseText = result.get().decodeToString()
+                            }
+                            is Result.Failure -> {
+                                responseText = "ERROR ${result.error.message}"
+                            }
                         }
-                        responseText = response
                     }
                 }) {
                     Text("Click to search for songs with inputted artist")

@@ -25,14 +25,17 @@ import androidx.lifecycle.lifecycleScope
 import com.example.week10.ui.theme.Week10Theme
 import com.github.kittinunf.fuel.core.Parameters
 import com.github.kittinunf.fuel.httpGet
-import com.github.kittinunf.fuel.json.responseJson // for JSON - uncomment when needed
-// import com.github.kittinunf.fuel.gson.responseObject // for GSON - uncomment when needed
+//import com.github.kittinunf.fuel.json.responseJson // for JSON - uncomment when needed
+import com.github.kittinunf.fuel.gson.responseObject // for GSON - uncomment when needed
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.URL
+
+data class Song(val id: Int, val title: String, val artist : String, val year: Int,
+                val downloads: Int, val price: Double, val quantity: Int)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +57,8 @@ class MainActivity : ComponentActivity() {
     fun hitastic(){
         var searchArtist by remember { mutableStateOf("") }
         var responseText by remember { mutableStateOf("") }
+        var songs by remember { mutableStateOf(listOf<Song>()) }
+
         Column {
 
             Row {
@@ -63,25 +68,40 @@ class MainActivity : ComponentActivity() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Row{
-                Button(modifier = Modifier.fillMaxWidth(),onClick = {
-                    var response =  ""
-                    lifecycleScope.launch {
-                        withContext(Dispatchers.IO){
-                            response = URL("http://10.0.2.2:3000/artist/${searchArtist}").readText()
+                Column {
+                    Button(modifier = Modifier.fillMaxWidth(), onClick = {
+                        var url = "http://10.0.2.2:3000/artist/${searchArtist}"
+                        url.httpGet().responseObject<List<Song>> { request, response, result ->
+                            when(result){
+                                is Result.Success -> {
+                                    songs = result.get()
+                                }
+                                is Result.Failure -> {
+                                    responseText = "ERROR ${result.error.message}"
+                                    songs = emptyList()
+                                }
+                            }
                         }
-                        responseText = response
+                    }) {
+                        Text("Get data from Web using Fuel GSON")
                     }
-                }) {
-                    Text("Click to search for songs with inputted artist")
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Row{
-                Text(responseText)
+                if(songs.isEmpty()){
+                    Text(responseText)
+                }else{
+                    songs.forEach{
+                        Text("ID: ${it.id}\nSong Title: ${it.title}\nArtist: ${it.artist}\n" +
+                                "Year: ${it.year}\nDownloads: ${it.downloads}\nPrice: ${it.price}\n"+
+                                "Quantity: ${it.quantity}\n" +
+                                "_____________________________________________________")
+                    }
+                }
             }
-            
         }
     }
 }

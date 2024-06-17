@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
                             }){
                                 Icon(imageVector = Icons.Filled.Add, "Add Song Button")
                             }
-                        }, title = {Text("Add Song Bar")})
+                        }, title = {Text("Hitastic Music App")})
                     }
 
                 ){
@@ -138,7 +138,63 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainDisplay(AddSongPageCallBack:() -> Unit){
-    Text("Main Display")
+    var searchArtist by remember { mutableStateOf("") }
+    var responseText by remember { mutableStateOf("") }
+    var songs by remember { mutableStateOf(listOf<Song>()) }
+
+    Column {
+
+        Row {
+            TextField(value = searchArtist, onValueChange = {searchArtist = it}, modifier = Modifier.fillMaxWidth())
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row{
+            Column {
+                Button(modifier = Modifier.fillMaxWidth(), onClick = {
+                    var url = "http://10.0.2.2:3000/artist/${searchArtist}"
+                    url.httpGet().responseObject<List<Song>> { request, response, result ->
+                        when(result){
+                            is Result.Success -> {
+                                songs = result.get()
+                            }
+                            is Result.Failure -> {
+                                responseText = "ERROR ${result.error.message}"
+                                songs = emptyList()
+                            }
+                        }
+                    }
+                }) {
+                    Text("Get data from Web using Fuel GSON")
+                }
+            }
+        }
+
+        Row {
+            Button(modifier = Modifier.fillMaxWidth(), onClick = { AddSongPageCallBack() }) {
+                Text("Add a song to the database")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row{
+            if(songs.isEmpty()){
+                Text(responseText)
+            }else{
+                LazyColumn {
+                    items(songs) {currentItem -> Text(
+                        "ID: ${currentItem.id}\nSong Title: ${currentItem.title}\n" +
+                                "Artist: ${currentItem.artist}\nYear: ${currentItem.year}\n" +
+                                "Downloads: ${currentItem.downloads}\nPrice: ${currentItem.price}" +
+                                "\nQuantity: ${currentItem.quantity}\n" +
+                                "__________________________________________________"
+                    )}
+                }
+            }
+        }
+    }
 }
 @Composable
 fun AddSongPage(MainDisplayCallBack:() -> Unit){

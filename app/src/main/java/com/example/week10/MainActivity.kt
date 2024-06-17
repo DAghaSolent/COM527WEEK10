@@ -1,6 +1,7 @@
 package com.example.week10
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
@@ -198,6 +200,47 @@ fun MainDisplay(AddSongPageCallBack:() -> Unit){
 }
 @Composable
 fun AddSongPage(MainDisplayCallBack:() -> Unit){
-    Text("Add Song Page")
+    var inputSongTitle by remember { mutableStateOf("") }
+    var inputSongArtist by remember { mutableStateOf("") }
+    var inputSongYear by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    Column{
+
+        // Text fields to input song details for a Song.
+        TextField(value = inputSongTitle, onValueChange = {inputSongTitle = it}, modifier = Modifier.fillMaxWidth())
+        TextField(value = inputSongArtist, onValueChange = {inputSongArtist = it}, modifier = Modifier.fillMaxWidth())
+        TextField(value = inputSongYear, onValueChange = {inputSongYear = it}, modifier = Modifier.fillMaxWidth())
+
+        Row {
+            Button(modifier = Modifier.fillMaxWidth(), onClick = {
+                val url = "http://10.0.2.2:3000/song/create"
+                val postData = listOf("title" to inputSongTitle, "artist" to inputSongArtist, "year" to inputSongYear)
+                url.httpPost(postData).response { request, response, result ->
+                    when(result){
+
+                        is Result.Success ->{
+                            Toast.makeText(context,
+                                "Song ID: ${result.get().decodeToString()} successfully posted to the database",
+                                Toast.LENGTH_LONG).show()
+                        }
+
+                        is Result.Failure -> {
+                            Toast.makeText(context, "ERROR ${result.error.message}", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            }) {
+                Text("Post Song Data to the server")
+            }
+        }
+
+        Row {
+            Button(modifier = Modifier.fillMaxWidth(), onClick = { MainDisplayCallBack() }) {
+                Text("Home Page to view songs database")
+            }
+        }
+
+    }
 }
 

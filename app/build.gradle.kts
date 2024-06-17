@@ -70,4 +70,5 @@ dependencies {
     implementation("com.github.kittinunf.fuel:fuel-android:2.3.1")
     implementation("com.github.kittinunf.fuel:fuel-gson:2.3.1")
     implementation("com.github.kittinunf.fuel:fuel-json:2.3.1")
+    implementation("androidx.navigation:navigation-compose:2.6.0")
 }

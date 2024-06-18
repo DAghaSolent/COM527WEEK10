@@ -214,23 +214,33 @@ fun AddSongPage(MainDisplayCallBack:() -> Unit){
 
         Row {
             Button(modifier = Modifier.fillMaxWidth(), onClick = {
-                val url = "http://10.0.2.2:3000/song/create"
-                val postData = listOf("title" to inputSongTitle, "artist" to inputSongArtist, "year" to inputSongYear)
-                url.httpPost(postData).response { request, response, result ->
-                    when(result){
 
-                        is Result.Success ->{
-                            Toast.makeText(context,
-                                "Song ID: ${result.get().decodeToString()} successfully posted to the database",
-                                Toast.LENGTH_LONG).show()
-                        }
+                if(inputSongTitle.isBlank()){
+                    Toast.makeText(context, "Song not added, Song title cannot be blank", Toast.LENGTH_LONG).show()
+                }else if(inputSongArtist.isBlank()){
+                    Toast.makeText(context, "Song not added, Song Artist cannot be blank", Toast.LENGTH_LONG).show()
+                }else if(inputSongYear.isBlank()){
+                    Toast.makeText(context, "Song not added, Song Year cannot be blank", Toast.LENGTH_LONG).show()
+                }else{
+                    val url = "http://10.0.2.2:3000/song/create"
+                    val postData = listOf("title" to inputSongTitle, "artist" to inputSongArtist, "year" to inputSongYear)
+                    url.httpPost(postData).response { request, response, result ->
+                        when(result){
 
-                        is Result.Failure -> {
-                            Toast.makeText(context, "ERROR ${result.error.message}", Toast.LENGTH_LONG).show()
+                            is Result.Success ->{
+                                Toast.makeText(context,
+                                    "Song ID: ${result.get().decodeToString()} successfully posted to the database",
+                                    Toast.LENGTH_LONG).show()
+                            }
+
+                            is Result.Failure -> {
+                                Toast.makeText(context, "ERROR ${result.error.message}", Toast.LENGTH_LONG).show()
+                            }
                         }
                     }
                 }
-            }) {
+            })
+            {
                 Text("Post Song Data to the server")
             }
         }
